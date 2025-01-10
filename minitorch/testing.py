@@ -186,15 +186,15 @@ class MathTestVariable(MathTest):
 
     @staticmethod
     def sum_red(a):
-        return a.sum(0)
+        return sum(a)
 
     @staticmethod
     def mean_red(a):
-        return a.mean(0)
+        return sum(a) / len(a)
 
     @staticmethod
     def mean_full_red(a):
-        return a.mean()
+        return sum(a) / len(a)
 
     @staticmethod
     def eq2(a, b):

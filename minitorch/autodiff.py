@@ -1,6 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, Iterable, List, Tuple
-
+from typing import Any, Iterable, Tuple
 from typing_extensions import Protocol
 
 # ## Task 1.1
@@ -22,8 +21,16 @@ def central_difference(f: Any, *vals: Any, arg: int = 0, epsilon: float = 1e-6) 
     Returns:
         An approximation of $f'_i(x_0, \ldots, x_{n-1})$
     """
-    # TODO: Implement for Task 1.1.
-    raise NotImplementedError("Need to implement for Task 1.1")
+    vals = list(vals)
+    original = vals[arg]
+
+    vals[arg] = original - epsilon
+    lower = f(*vals)
+
+    vals[arg] = original + epsilon
+    upper = f(*vals)
+
+    return (upper - lower) / (2 * epsilon)
 
 
 variable_count = 1
@@ -61,8 +68,21 @@ def topological_sort(variable: Variable) -> Iterable[Variable]:
     Returns:
         Non-constant Variables in topological order starting from the right.
     """
-    # TODO: Implement for Task 1.4.
-    raise NotImplementedError("Need to implement for Task 1.4")
+    results = [variable]
+    travel_index = 0
+    seen = set()
+
+    while True:
+        for var in results[travel_index].parents:
+            if (not var.is_constant()) and (var.unique_id not in seen):
+                results.append(var)
+                seen.add(var.unique_id)
+        travel_index += 1
+
+        if travel_index >= len(results):
+            break
+
+    return results
 
 
 def backpropagate(variable: Variable, deriv: Any) -> None:
@@ -76,8 +96,19 @@ def backpropagate(variable: Variable, deriv: Any) -> None:
 
     No return. Should write to its results to the derivative values of each leaf through `accumulate_derivative`.
     """
-    # TODO: Implement for Task 1.4.
-    raise NotImplementedError("Need to implement for Task 1.4")
+    variables = topological_sort(variable)
+    vals = {variable.unique_id: deriv}
+
+    for curr_var in variables:
+        if curr_var.is_leaf():
+            curr_var.accumulate_derivative(vals[curr_var.unique_id])
+        else:
+            derivs = curr_var.chain_rule(vals[curr_var.unique_id])
+            for var, der in derivs:
+                if var.unique_id in vals:
+                    vals[var.unique_id] = vals[var.unique_id] + der
+                else:
+                    vals[var.unique_id] = der
 
 
 @dataclass
